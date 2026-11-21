@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>汇报标题</title>
+<style>
+  /* ========== 1. 设计令牌：只改这里，全篇跟随 ========== */
+  :root{
+    --bg:#F4F1EA;
+    --ink:#16130F;
+    --muted:#6B6357;
+    --accent:#B4402C;
+    --line:rgba(22,19,15,.16);
+
+    --font-sans:"PingFang SC","Hiragino Sans GB","Source Han Sans SC","Noto Sans CJK SC","Microsoft YaHei",system-ui,sans-serif;
+    --font-serif:"Songti SC","Noto Serif CJK SC","Source Han Serif SC","SimSun",serif;
+    --font-mono:"SF Mono","JetBrains Mono",Menlo,Consolas,monospace;
+
+    --pad:96px;          /* 页边距 */
+    --gap:24px;          /* 栅格间距 */
+  }
+
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%;background:var(--ink)}
+  body{font-family:var(--font-sans);color:var(--ink);overflow:hidden}
+
+  /* ========== 2. 舞台与页面 ========== */
+  .stage{position:fixed;inset:0;display:grid;place-items:center}
+  .slide{
+    position:absolute;width:1600px;height:900px;background:var(--bg);
+    padding:var(--pad);display:flex;flex-direction:column;
+    opacity:0;visibility:hidden;transform-origin:center center;
+    transition:opacity .24s cubic-bezier(.2,.7,.3,1);
+  }
+  .slide.active{opacity:1;visibility:visible;z-index:1}
+  .slide.active [data-anim]{animation:rise .24s cubic-bezier(.2,.7,.3,1) both}
+  @keyframes rise{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+
+  /* ========== 3. 版式角色 ========== */
+  .kicker{font-family:var(--font-mono);font-size:14px;letter-spacing:.08em;color:var(--accent);text-transform:uppercase}
+  .title{font-family:var(--font-serif);font-size:56px;line-height:1.25;font-weight:700;margin-top:16px}
+  .title-cover{font-size:96px;line-height:1.1}
+  .lead{font-size:28px;line-height:1.5;color:var(--muted);margin-top:24px;max-width:1100px}
+  .body{font-size:22px;line-height:1.6;margin-top:40px;max-width:1050px}
+  .note{font-size:16px;line-height:1.5;color:var(--muted);margin-top:auto}
+  .metric{font-family:var(--font-mono);font-variant-numeric:tabular-nums;font-size:96px;line-height:1;letter-spacing:-.02em}
+  .metric-unit{font-size:22px;font-family:var(--font-sans);color:var(--muted);margin-left:8px}
+
+  .rule{height:1px;background:var(--line);margin:40px 0}
+
+  /* 12 列栅格：页面内任意分区都从这里取 */
+  .grid{display:grid;grid-template-columns:repeat(12,1fr);gap:var(--gap)}
+
+  footer{position:absolute;left:var(--pad);right:var(--pad);bottom:40px;display:flex;justify-content:space-between;
+    font-size:16px;color:var(--muted);font-family:var(--font-mono)}
+  .pager-num::after{content:attr(data-n)}
+
+  /* ========== 4. 打印 / 导出 PDF ========== */
+  @media print{
+    @page{size:1600px 900px;margin:0}
+    html,body{background:#fff;overflow:visible}
+    .stage{position:static;display:block}
+    .slide{position:relative;opacity:1;visibility:visible;transform:none!important;
+      break-after:page;page-break-after:always;
+      -webkit-print-color-adjust:exact;print-color-adjust:exact}
+  }
+  @media (prefers-reduced-motion:reduce){
+    .slide,.slide.active [data-anim]{transition:none;animation:none}
+  }
+</style>
+</head>
+<body>
+<main class="stage" id="stage">
+
+  <!-- 页面 1：封面。复制整段 <section> 增加新页，class 保持 slide -->
+  <section class="slide active">
+    <p class="kicker" data-anim>评审汇报 · 2026</p>
+    <h1 class="title title-cover" data-anim>在这里放汇报主标题<br>第二行可缩进形成错位</h1>
+    <p class="lead" data-anim>一行副标题：这次汇报要拿到的结论是什么。</p>
+    <p class="note">汇报人 / 部门 / 日期</p>
+    <footer><span>项目名称</span><span class="pager-num" data-n="1"></span></footer>
+  </section>
+
+  <!-- 页面 2：结论页。一页一个结论，三条支撑用等宽编号 -->
+  <section class="slide">
+    <p class="kicker">结论</p>
+    <h2 class="title" data-anim>把「这一页要证明的结论」写成一句完整的话</h2>
+    <div class="rule"></div>
+    <div class="body">
+      <p><strong>01</strong>　第一条支撑，一句话。</p>
+      <p style="margin-top:24px"><strong>02</strong>　第二条支撑，一句话。</p>
+      <p style="margin-top:24px"><strong>03</strong>　第三条支撑，一句话。</p>
+    </div>
+    <footer><span>数据口径 / 来源</span><span class="pager-num" data-n="2"></span></footer>
+  </section>
+
+</main>
+
+<script>
+(function(){
+  var DESIGN_W = 1600, DESIGN_H = 900;
+  var slides = Array.prototype.slice.call(document.querySelectorAll('.slide'));
+  var stage  = document.getElementById('stage');
+  var i = 0;
+
+  function fit(){
+    var s = Math.min(window.innerWidth / DESIGN_W, window.innerHeight / DESIGN_H);
+    slides.forEach(function(el){ el.style.transform = 'scale(' + s + ')'; });
+  }
+  function show(n){
+    if(n < 0 || n >= slides.length) return;
+    slides[i].classList.remove('active');
+    i = n;
+    slides[i].classList.add('active');
+    history.replaceState(null,'','#'+(i+1));
+  }
+  function next(){ show(i+1); }
+  function prev(){ show(i-1); }
+
+  document.addEventListener('keydown', function(e){
+    if(['ArrowRight','ArrowDown',' ','PageDown','Enter'].indexOf(e.key) > -1){ e.preventDefault(); next(); }
+    if(['ArrowLeft','ArrowUp','PageUp'].indexOf(e.key) > -1){ e.preventDefault(); prev(); }
+    if(e.key === 'Home'){ show(0); }
+    if(e.key === 'End'){ show(slides.length-1); }
+  });
+
+  stage.addEventListener('click', function(e){
+    var x = e.clientX / window.innerWidth;
+    if(x > 0.5) next(); else prev();
+  });
+
+  window.addEventListener('resize', fit);
+  var hash = parseInt(location.hash.replace('#',''), 10);
+  if(hash > 0 && hash <= slides.length){ slides[0].classList.remove('active'); i = hash-1; slides[i].classList.add('active'); }
+  fit();
+})();
+</script>
+</body>
+</html>
