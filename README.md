@@ -1,8 +1,8 @@
-# 前端设计风格技能 · outline-to-deck-skill
+# 前端设计 · Frontend Design Skill
 
-一个符合 [Agent Skills](https://github.com/anthropics/skills) 标准的开源技能。
+一个符合 [Agent Skills](https://github.com/anthropics/skills) 标准的开源技能包。
 
-**一句话定位：这是一个「前端设计风格」技能。** 你说出一个风格名——赛博朋克、玻璃拟态、新中式、便当盒布局、蒸汽波……Agent 就按该风格**沉淀好的设计 token** 出页面，而不是凭感觉临时发挥。它让 AI 生成的前端界面从「能看」变成「有明确风格立场、且风格可复现」。
+**一句话定位：面向全栈页面的设计，提供 21 种风格，可以随心搭配选择。** 你说出一个风格名——赛博朋克、玻璃拟态、新中式、便当盒布局、蒸汽波……Agent 就按该风格**沉淀好的设计 token** 出页面，而不是凭感觉临时发挥。它让 AI 生成的前端界面从「能看」变成「有明确风格立场、且风格可复现」。
 
 技能自带一个完整载体：把文字汇报大纲变成可直接投屏的单文件 HTML 演示页。但风格预设本身是通用的——**任何前端项目都可以套用这套风格库**，下面的真实笔记应用演示就是证明。
 
@@ -231,14 +231,14 @@
 
 ```bash
 # 克隆后把技能目录放入你的技能文件夹（Claude Code 等支持 Agent Skills 的环境）
-git clone https://github.com/landawang-star/outline-to-deck-skill.git
-cp -r outline-to-deck-skill ~/.claude/skills/汇报大纲转高保真演示页
+git clone https://github.com/landawang-star/frontend-design-skill.git
+cp -r frontend-design-skill ~/.claude/skills/前端设计
 ```
 
 ## 目录结构
 
 ```
-outline-to-deck-skill/
+frontend-design-skill/
 ├── SKILL.md                     # 主入口：YAML frontmatter + 五步工作流 + 红线
 ├── references/
 │   ├── style-presets.md         # 21 种风格预设 token（点名即用）
