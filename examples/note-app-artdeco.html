@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>云记 · 装饰艺术版</title>
+<!--
+  风格版 18 · 装饰艺术 Art Deco：token 取自 references/style-presets.md，DOM 与基准版一致。
+  规则：严格对称、金+墨底+白三主色、细金双线框、硬色标放射纹（repeating-conic 无过渡段）、菱形分隔符 ◆。
+-->
+<style>
+  :root {
+    --bg: #0F2830;
+    --panel: #12313A;
+    --ink: #F5EDD8;
+    --muted: #9BAFA8;
+    --accent: #D4AF37;
+    --font-deco: Georgia, "Songti SC", "Noto Serif SC", serif;
+    --font-sans: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; border-radius: 0 !important; }
+  body {
+    font-family: var(--font-sans);
+    background: var(--bg);
+    color: var(--ink);
+    height: 100vh;
+    overflow: hidden;
+    padding: 14px;
+    font-size: 13px;
+  }
+  /* 顶部金色放射纹：硬色标分段（无过渡） */
+  body::before {
+    content: ""; position: fixed; top: 0; left: 0; right: 0; height: 130px; z-index: 0;
+    background: repeating-conic-gradient(from -90deg at 50% 0%, var(--accent) 0deg 2deg, transparent 2deg 10deg);
+    opacity: .14;
+    pointer-events: none;
+  }
+  .app { position: relative; display: grid; grid-template-columns: 224px 304px 1fr; height: calc(100vh - 28px); gap: 14px; z-index: 1; }
+
+  /* 面板通用：墨底 + 细金双线框（border + inset box-shadow） */
+  .sidebar, .list-pane, .editor-head {
+    background: var(--panel);
+    border: 1px solid var(--accent);
+    box-shadow: inset 0 0 0 4px var(--panel), inset 0 0 0 5px var(--accent);
+  }
+
+  /* ── 侧栏 ─────────────────────── */
+  .sidebar { padding: 22px 16px; display: flex; flex-direction: column; gap: 18px; }
+  .brand {
+    font-family: var(--font-deco); font-weight: 700; font-size: 20px; letter-spacing: 8px;
+    text-align: center; color: var(--accent); text-transform: uppercase;
+  }
+  .brand::before { content: "◆◆ "; font-size: 10px; letter-spacing: 2px; }
+  .brand::after { content: " ◆◆"; font-size: 10px; letter-spacing: 2px; }
+  .brand em { font-style: normal; color: var(--ink); }
+  .search input {
+    width: 100%; padding: 9px 12px; font-size: 13px; font-family: var(--font-sans);
+    border: 1px solid var(--accent); background: var(--bg); color: var(--ink); outline: none;
+    text-align: center;
+  }
+  .search input:focus { box-shadow: 0 0 0 1px var(--accent); }
+  .nav-title {
+    font-size: 11px; color: var(--accent); margin-bottom: 8px; letter-spacing: 4px;
+    text-align: center; font-family: var(--font-deco);
+  }
+  .nav-title::before { content: "— "; }
+  .nav-title::after { content: " —"; }
+  .folders { display: flex; flex-direction: column; gap: 4px; }
+  .folder {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 8px 12px; font-size: 13px; cursor: pointer;
+    border-top: 1px solid rgba(212,175,55,.25);
+    letter-spacing: 2px;
+  }
+  .folder:last-child { border-bottom: 1px solid rgba(212,175,55,.25); }
+  .folder:hover { color: var(--accent); }
+  .folder.active { background: rgba(212,175,55,.12); color: var(--accent); font-weight: 700; }
+  .folder .count { font-size: 11px; color: var(--muted); font-family: var(--font-deco); }
+  .folder.active .count { color: var(--accent); }
+  .tags { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
+  .tag { font-size: 11px; letter-spacing: 1px; color: var(--muted); cursor: pointer; }
+  .tag::before { content: "◆ "; color: var(--accent); font-size: 8px; }
+  .tag:hover { color: var(--accent); }
+  .user {
+    margin-top: auto; display: flex; align-items: center; gap: 10px;
+    padding: 14px 10px 0; border-top: 1px solid var(--accent);
+  }
+  .avatar {
+    width: 38px; height: 38px;
+    border: 1px solid var(--accent); box-shadow: inset 0 0 0 3px var(--panel), inset 0 0 0 4px var(--accent);
+    color: var(--accent); display: grid; place-items: center; font-size: 14px; font-family: var(--font-deco);
+  }
+  .user .name { font-size: 13px; font-weight: 700; letter-spacing: 2px; }
+  .user .plan { font-size: 11px; color: var(--muted); letter-spacing: 1px; }
+
+  /* ── 笔记列表 ─────────────────────── */
+  .list-pane { display: flex; flex-direction: column; }
+  .list-head {
+    padding: 18px 16px 12px; display: flex; justify-content: space-between; align-items: center;
+    border-bottom: 1px solid var(--accent);
+  }
+  .list-head h2 { font-family: var(--font-deco); font-size: 15px; letter-spacing: 6px; color: var(--accent); }
+  .btn-new {
+    font-family: var(--font-sans); font-size: 12px; letter-spacing: 2px; padding: 7px 16px;
+    border: 1px solid var(--accent); background: transparent; color: var(--accent); cursor: pointer;
+  }
+  .btn-new:hover { background: var(--accent); color: var(--bg); }
+  .notes { overflow-y: auto; flex: 1; }
+  .note-item { padding: 14px 16px; border-bottom: 1px solid rgba(212,175,55,.25); cursor: pointer; }
+  .note-item:hover { background: rgba(212,175,55,.06); }
+  .note-item.active { background: rgba(212,175,55,.12); border-left: 3px solid var(--accent); }
+  .note-item h3 { font-family: var(--font-deco); font-size: 13.5px; font-weight: 700; margin-bottom: 4px; letter-spacing: 1px; }
+  .note-item p { font-size: 12px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .note-meta { display: flex; gap: 6px; margin-top: 6px; align-items: center; }
+  .note-meta .chip { font-size: 10.5px; color: var(--muted); letter-spacing: 1px; }
+  .note-meta .chip::before { content: "◆ "; color: var(--accent); font-size: 8px; }
+  .note-meta time { font-size: 10.5px; color: var(--muted); margin-left: auto; }
+
+  /* ── 编辑区 ─────────────────────── */
+  .editor { display: flex; flex-direction: column; overflow-y: auto; }
+  .editor-head {
+    padding: 16px 28px; display: flex; align-items: center; justify-content: space-between;
+    position: sticky; top: 0; margin-bottom: 14px;
+  }
+  .editor-head .actions { display: flex; gap: 14px; font-size: 12px; color: var(--muted); letter-spacing: 2px; }
+  .editor-head .actions span { cursor: pointer; padding: 4px 8px; }
+  .editor-head .actions span:hover { color: var(--accent); }
+  .doc { max-width: 680px; margin: 0 auto; padding: 30px 36px 80px; width: 100%; text-align: left; }
+  .doc .title {
+    font-family: var(--font-deco); font-size: 32px; font-weight: 700; line-height: 1.4;
+    margin-bottom: 14px; letter-spacing: 6px; text-align: center; color: var(--accent);
+  }
+  .doc .title::before { content: "◆ "; font-size: 14px; }
+  .doc .title::after { content: " ◆"; font-size: 14px; }
+  .doc .meta { display: flex; gap: 10px; align-items: center; margin-bottom: 28px; justify-content: center; }
+  .doc .meta .chip { font-size: 11px; padding: 3px 14px; letter-spacing: 2px; color: var(--ink); border: 1px solid var(--accent); }
+  .doc .meta time { font-size: 12px; color: var(--muted); letter-spacing: 1px; }
+  .doc p { font-size: 14px; line-height: 1.95; margin-bottom: 16px; letter-spacing: .5px; }
+  .doc h3 {
+    font-family: var(--font-deco); font-size: 17px; margin: 26px 0 14px; letter-spacing: 4px;
+    color: var(--accent); text-align: center;
+  }
+  .doc h3::before { content: "— "; }
+  .doc h3::after { content: " —"; }
+  /* 扇形阶梯边角引用框 */
+  .doc blockquote {
+    border: 1px solid var(--accent);
+    clip-path: polygon(0 0, 96% 0, 100% 14%, 100% 100%, 4% 100%, 0 86%);
+    background: rgba(212,175,55,.08);
+    padding: 16px 22px; font-size: 13.5px; margin-bottom: 16px; line-height: 1.8;
+    color: var(--accent); font-family: var(--font-deco); letter-spacing: 1px;
+  }
+  .checklist { list-style: none; margin-bottom: 16px; }
+  .checklist li { font-size: 14px; line-height: 2.1; display: flex; gap: 10px; align-items: baseline; letter-spacing: .5px; }
+  .checklist li::before { content: "◇"; color: var(--muted); }
+  .checklist li.done { color: var(--muted); text-decoration: line-through; }
+  .checklist li.done::before { content: "◆"; color: var(--accent); }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <aside class="sidebar">
+    <div class="brand">云记<em>.</em></div>
+    <div class="search"><input type="text" placeholder="搜索笔记…"></div>
+    <div>
+      <div class="nav-title">文件夹</div>
+      <nav class="folders">
+        <div class="folder active"><span>全部笔记</span><span class="count">12</span></div>
+        <div class="folder"><span>工作</span><span class="count">6</span></div>
+        <div class="folder"><span>读书</span><span class="count">3</span></div>
+        <div class="folder"><span>灵感</span><span class="count">2</span></div>
+        <div class="folder"><span>生活</span><span class="count">1</span></div>
+      </nav>
+    </div>
+    <div>
+      <div class="nav-title">标签</div>
+      <div class="tags">
+        <span class="tag">#产品</span><span class="tag">#评审</span>
+        <span class="tag">#读书</span><span class="tag">#改版</span>
+        <span class="tag">#周会</span><span class="tag">#旅行</span>
+      </div>
+    </div>
+    <div class="user">
+      <div class="avatar">林</div>
+      <div><div class="name">林小满</div><div class="plan">Pro 会员</div></div>
+    </div>
+  </aside>
+
+  <main class="list-pane">
+    <div class="list-head">
+      <h2>全部笔记</h2>
+      <button class="btn-new">＋ 新建</button>
+    </div>
+    <div class="notes">
+      <article class="note-item active">
+        <h3>Q4 产品评审备忘</h3>
+        <p>本周评审要确认三件事：信息架构是否收敛、搜索入口是否前移、以及改版后的数据口径…</p>
+        <div class="note-meta"><span class="chip">#产品</span><span class="chip">#评审</span><time>10:24</time></div>
+      </article>
+      <article class="note-item">
+        <h3>读书笔记：《设计心理学》</h3>
+        <p>诺曼的示能概念对本次改版很有启发——好的设计是让用户不需要说明书…</p>
+        <div class="note-meta"><span class="chip">#读书</span><time>昨天</time></div>
+      </article>
+      <article class="note-item">
+        <h3>灵感：落地页改版方向</h3>
+        <p>首屏只讲一件事；把转化按钮从第三屏提到首屏右侧；社会证明用数字而不是口号…</p>
+        <div class="note-meta"><span class="chip">#改版</span><time>昨天</time></div>
+      </article>
+      <article class="note-item">
+        <h3>周会纪要 · 11 月第 3 周</h3>
+        <p>增长组同步了召回实验结果：推送文案 B 组留存 +2.3%；下轮实验聚焦唤醒时机…</p>
+        <div class="note-meta"><span class="chip">#周会</span><time>周一</time></div>
+      </article>
+      <article class="note-item">
+        <h3>旅行清单：京都五日</h3>
+        <p>清水寺早上去人少；岚山小火车的票要提前两周订；带一双好走的鞋…</p>
+        <div class="note-meta"><span class="chip">#旅行</span><time>11-08</time></div>
+      </article>
+    </div>
+  </main>
+
+  <section class="editor">
+    <div class="editor-head">
+      <span class="actions"><span>收藏</span><span>分享</span><span>导出</span></span>
+      <span class="actions"><span>自动保存 · 刚刚</span></span>
+    </div>
+    <div class="doc">
+      <h1 class="title">Q4 产品评审备忘</h1>
+      <div class="meta"><span class="chip">#产品</span><span class="chip">#评审</span><time>2026-11-21 10:24 · 云记</time></div>
+      <p>本周评审要确认三件事：信息架构是否收敛、搜索入口是否前移、以及改版后的数据口径怎么定。以下按讨论顺序整理。</p>
+      <h3>一、信息架构</h3>
+      <p>现有导航七个入口收敛到四个：写作、发现、清单、我的。被合并的功能不删除，收进「更多」。原则是让新用户在三步内完成第一次记录。</p>
+      <blockquote>好的结构不是把功能都摆出来，而是让最常用的那条路最短。</blockquote>
+      <h3>二、待办确认</h3>
+      <ul class="checklist">
+        <li class="done">确认导航收敛方案，输出交互稿</li>
+        <li>搜索入口前移到首屏，AB 分组方案</li>
+        <li>改版数据口径：以「周活跃记录用户」为准</li>
+        <li>评审时间定为周四下午三点</li>
+      </ul>
+      <p>风险提示：收敛入口后老用户的路径记忆会被打断，需要准备一份变更说明，并在更新日志里置顶一周。</p>
+    </div>
+  </section>
+
+</div>
+</body>
+</html>
